@@ -65,33 +65,27 @@ function player(name, marker) {
     return {name, marker, getMoves, addMove};
 }
 
-function gameController() {
+const gameController = (function() {
     const playerOne = player("playerOne", "O");
     const playerTwo = player("playerTwo", "X");
     let currentPlayer = playerOne;
     let win = false;
+    let turns = 0;
+
+    const getCurrentPlayer = () => {
+        return currentPlayer;
+    }
 
     // Check if the move played has not been played yet.
     // If not, add move index to player moves and change cell's value.
     function playRound(player, move) {
-        if (checkMove(move)) {
-            player.addMove(move);
-        }
-        else {
-            return;
-        }
+        currentPlayer.addMove(move);
+        gameboard.getBoard();
+        turns += 1;
+        checkWin();
+        switchPlayer();
+        console.log(currentPlayer);
     }
-
-    function checkMove(move) {
-        if (gameboard.getCell(move).getValue() != "-") {
-            let newMove = prompt("Invalid choice, try again!");
-            playRound(currentPlayer, newMove);
-            return;
-        }
-        else {
-            currentPlayer.addMove(move);
-        }
-    };
 
     function switchPlayer() {
         if (currentPlayer === playerOne) {
@@ -115,6 +109,10 @@ function gameController() {
             ["2", "4", "6"]
         ]
         let count = 0;
+        if (turns === 9) {
+                console.log("Tie game!");
+                return;
+            }
         outer:
         for (const winner of winners) {
             count = 0;
@@ -127,34 +125,44 @@ function gameController() {
                 }
             }
             if (count == 3) {
-                win = true;
                 console.log(currentPlayer.name + " wins!");
                 break outer;
             }
         }
-        return win;    
     };
 
-    function playGame() {
-        let turns = 0;
-        gameboard.getBoard();
-        while (!win) {
-            if (turns === 9) {
-                console.log("Tie game!");
-                return;
-            }
-            let move = prompt(currentPlayer.name + " to play");
-            if (move === null) {
-                return;
-            }
-            playRound(currentPlayer, move);
-            turns += 1;
-            gameboard.getBoard();
-            checkWin();
-            switchPlayer();
-        }
-    };
-    playGame();
+    gameboard.getBoard();
+    return {getCurrentPlayer, playRound};
     
-};
-gameController();
+})();
+
+
+function displayController() {
+    const squares = document.getElementsByClassName("square");
+    function renderGameboard() {
+        for (let i = 0; i < squares.length; i++) {
+            let button = document.createElement("button");
+            button.classList.add("square-button");
+            button.dataset.id = i;
+            squares[i].appendChild(button);
+        }
+        const squareButtons = document.querySelectorAll(".square-button");
+        squareButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                console.log(button.dataset.id);
+                console.log(gameController.getCurrentPlayer());
+                button.textContent = gameController.getCurrentPlayer().marker;
+                button.disabled = true;
+                gameController.playRound(gameController.getCurrentPlayer(), button.dataset.id);
+            });
+        });
+    }
+    
+
+   
+
+
+    
+    renderGameboard();
+}
+displayController();
