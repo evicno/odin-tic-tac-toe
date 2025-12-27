@@ -7,37 +7,48 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="player one">
-        <div class="name">
-            Player 1
-        </div>
-        <div class="change-name">
-            <button class="name-button" id="change-one">Change name</button>
-        </div>
-        <div class="marker">O</div>
-        <div class="score"></div>
+    <div class="header">
+        <button class="start">Start</button>
     </div>
-    <div class="board-container">
-        <div class="top-row left square"></div>
-        <div class="top-row middle square"></div>
-        <div class="top-row right square"></div>
-        <div class="middle-row left square"></div>
-        <div class="middle-row middle square"></div>
-        <div class="middle-row right square"></div>
-        <div class="bottom-row left square"></div>
-        <div class="bottom-row middle square"></div>
-        <div class="bottom-row right square"></div>
-    </div>
-    <div class="player two">
-        <div class="name">
-            Player 2
+    <div class="main">
+        <div class="player one">
+            <div class="marker">O</div>
+            <div class="name">
+                Player 1
+            </div>
+            <div class="change-name">
+                <button class="name-button" id="change-one">Change name</button>
+            </div>
+            <div class="score"></div>
         </div>
-        <div class="change-name">
-            <button class="name-button" id="change-two">Change name</button>
+        <div class="board-container">
+            <div class="top-row left square"></div>
+            <div class="top-row middle square"></div>
+            <div class="top-row right square"></div>
+            <div class="middle-row left square"></div>
+            <div class="middle-row middle square"></div>
+            <div class="middle-row right square"></div>
+            <div class="bottom-row left square"></div>
+            <div class="bottom-row middle square"></div>
+            <div class="bottom-row right square"></div>
         </div>
-        <div class="marker">X</div>
-        <div class="score"></div>
+        <div class="player two">
+            <div class="marker">X</div>
+            <div class="name">
+                Player 2
+            </div>
+            <div class="change-name">
+                <button class="name-button" id="change-two">Change name</button>
+            </div>
+            <div class="score"></div>
+        </div>
     </div>
+    <dialog>
+        <p></p>
+        <button classe="close" autofocus>Start over</button>
+        <button class="continue">Continue</button>
+    </dialog>
+
     <script src="javascript.js"></script>
 </body>
 </html>
