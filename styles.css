@@ -1,3 +1,21 @@
+@font-face {
+    font-family: 'Eraser';
+    src: url('fonts/EraserDust.woff2') format('woff2'),
+        url('fonts/EraserDust.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Eraser';
+    src: url('fonts/EraserRegular.woff2') format('woff2'),
+        url('fonts/EraserRegular.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -11,6 +29,12 @@
     interpolate-size: allow-keywords;
   }
 }
+
+:root {
+    --board-size: 450px;
+    --square-size: 150px;
+}
+
 body {
   /* 4. Add accessible line-height */
   line-height: 1.5;
@@ -18,22 +42,29 @@ body {
   -webkit-font-smoothing: antialiased;
   height: 100vh;
   width: 100vw;
+  background-image: url("images/chalkboard.jpg");
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Eraser";
+  color: white;
 }
 
 .board-container {
-    margin: 100px;
-    height: 300px;
-    width: 300px;
+    height: var(--board-size);
+    width: var(--board-size);
     display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    background-image: url("images/grid.png");
+    background-size: cover;
 }
 
+
+
 .square {
-    border: 1px solid black;
-    height: 100px;
-    width: 100px;
+    border: none;
+    width: var(--square-size);
 }
 
 .top-row {
@@ -50,10 +81,44 @@ body {
 
 .right {
     border-right: none;
+
 }
 
 button {
-    height: 100px;
-    width: 100px;
+    height: var(--square-size);
+    width: var(--square-size);
+    border: none; 
+    font-size: 120px;
+    background-color: transparent;
+    font-family: "Eraser";
+    color: white;
+}
+
+.player {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    padding: 16px;
+}
+
+.change-name {
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.name-button {
+    font-size: 24px;
+    color: black;
+    background-color: white;
     border: none;
+    height: 30px;
+    width: 200px;
+    border-radius: 5px;
+}
+
+.marker {
+    font-size: 120px;
 }

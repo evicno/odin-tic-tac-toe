@@ -53,6 +53,14 @@ const gameboard = (function() {
 function player(name, marker) {
     let moves = [];
 
+    const getName = () => {
+        return name;
+    }
+
+    const setName = (newName) => {
+        name = newName;
+    }
+
     const getMoves = () => {
         return moves;
     }
@@ -62,14 +70,13 @@ function player(name, marker) {
             gameboard.getCell(move).setValue(marker);
     }
 
-    return {name, marker, getMoves, addMove};
+    return {getName, setName, marker, getMoves, addMove};
 }
 
 const gameController = (function() {
     const playerOne = player("playerOne", "O");
     const playerTwo = player("playerTwo", "X");
     let currentPlayer = playerOne;
-    let win = false;
     let turns = 0;
 
     const getCurrentPlayer = () => {
@@ -84,7 +91,6 @@ const gameController = (function() {
         turns += 1;
         checkWin();
         switchPlayer();
-        console.log(currentPlayer);
     }
 
     function switchPlayer() {
@@ -109,11 +115,6 @@ const gameController = (function() {
             ["2", "4", "6"]
         ]
         let count = 0;
-        if (turns === 9) {
-                console.log("Tie game!");
-                return;
-            }
-        outer:
         for (const winner of winners) {
             count = 0;
             for (const num of winner) {
@@ -125,20 +126,38 @@ const gameController = (function() {
                 }
             }
             if (count == 3) {
-                console.log(currentPlayer.name + " wins!");
-                break outer;
+                console.log(currentPlayer.getName() + " wins!");
+                return;
             }
+        }
+        if (turns === 9) {
+        console.log("Tie game!");
+        return;
         }
     };
 
     gameboard.getBoard();
-    return {getCurrentPlayer, playRound};
+    return {playerOne, playerTwo, getCurrentPlayer, playRound};
     
 })();
 
 
 function displayController() {
     const squares = document.getElementsByClassName("square");
+    const playerOneName = document.querySelector(".one .name");
+    const playerTwoName = document.querySelector(".two .name");
+
+    function changeName(playerOld, playerName) {
+        let newName = prompt("New name for " + playerOld.getName());
+        if (newName) {
+            playerOld.setName(newName);
+            playerName.textContent = newName;
+        }
+        else {
+            return;
+        }
+    }
+
     function renderGameboard() {
         for (let i = 0; i < squares.length; i++) {
             let button = document.createElement("button");
@@ -149,13 +168,22 @@ function displayController() {
         const squareButtons = document.querySelectorAll(".square-button");
         squareButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                console.log(button.dataset.id);
-                console.log(gameController.getCurrentPlayer());
                 button.textContent = gameController.getCurrentPlayer().marker;
                 button.disabled = true;
                 gameController.playRound(gameController.getCurrentPlayer(), button.dataset.id);
             });
         });
+        const changeButtons = document.querySelectorAll(".name-button");
+        changeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                if (button.id == "change-one") {
+                    changeName(gameController.playerOne, playerOneName);
+                }
+                else {
+                    changeName(gameController.playerTwo, playerTwoName);
+                }
+            })
+        })
     }
     
 
