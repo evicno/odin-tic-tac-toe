@@ -1,49 +1,6 @@
-// Create the structure of the gameboard
-const gameboard = (function() {
-    const rows = 3;
-    const columns = 3;
-    const board = [];
-
-    // Access to cell index and value
-    function cell(index) {
-        let value = "-";
-
-        const getValue = () => {
-            return value;
-        }
-        
-        const setValue = (newValue) => {
-            value = newValue;
-        }
-
-        return {index, getValue, setValue};
-    }
- 
-    // Create board by adding a board inside each row. 
-    // Add cells with unique index inside.
-    const createBoard = (function () {
-        for (let i = 0; i < rows; i++) {
-                board[i] = [];
-            for (let j = 0; j < columns; j++) {
-                const newCell = cell(i * 3 + j);
-                board[i].push(newCell);
-            }
-        }
-    })();
-
-    // Access a cell of the board array from its index
-    function getCell(index) {
-        let i = Math.floor(index / 3);
-        let j = index % 3;
-        return board[i][j];
-    }
-
-    return {board, cell, getCell};
-
-})();
 
 // Create a player objects and functions to get/set data
-function player(name, marker, score = 0) {
+function player(name, marker, score) {
     let moves = [];
 
     const getName = () => {
@@ -59,8 +16,7 @@ function player(name, marker, score = 0) {
     }
 
     const addMove = (move) => {
-            moves.push(move);
-            gameboard.getCell(move).setValue(marker);
+        moves.push(move);
     }
 
     const clearMoves = () => {
@@ -69,6 +25,11 @@ function player(name, marker, score = 0) {
     }
 
     const getScore = () => {
+        return score;
+    }
+
+    const clearScore = () => {
+        score = 0;
         return score;
     }
 
@@ -81,36 +42,49 @@ function player(name, marker, score = 0) {
         getName, setName, 
         marker, 
         getMoves, addMove, clearMoves,
-        getScore, addPoint};
+        getScore, clearScore, addPoint};
 }
 
 // Control the flow of the game
 const gameController = (function() {
-    const playerOne = player("Player 1", "O");
-    const playerTwo = player("Player 2", "X");
+    const playerOne = player("Player 1", "O", 0);
+    const playerTwo = player("Player 2", "X", 0);
     let currentPlayer = playerOne;
     let turns = 0;
+
 
     const getCurrentPlayer = () => {
         return currentPlayer;
     }
 
-    const clearGame = () => {
+    // Put settings ready for a new round (after "continue")
+    const resetSettingsRound = () => {
+        playerOne.clearMoves();
+        playerTwo.clearMoves();
         turns = 0;
-        currentPlayer = playerOne;
-        return {turns, currentPlayer}
+
+        return {playerOne, playerTwo, turns, currentPlayer};
+    }
+
+    // Put settings ready for a new game (after "restart" or "start over")
+    const resetSettingsGame = () => {
+        resetSettingsRound();
+        playerOne.clearScore();
+        playerTwo.clearScore();
+
+        return {playerOne, playerTwo, turns, currentPlayer};
     }
 
     // Check if the move played has not been played yet.
     // If not, add move index to player moves and change cell's value.
-    function playRound(player, move) {
+    function playMove(move) {
         currentPlayer.addMove(move);
         turns += 1;
         checkWin();
         switchPlayer();
     }
 
-    // Switch player after each round
+    // Switch player after each move or after each round
     function switchPlayer() {
         if (currentPlayer === playerOne) {
             currentPlayer = playerTwo;
@@ -119,7 +93,7 @@ const gameController = (function() {
             currentPlayer = playerOne;
         }
     };
-    
+
     // Check the player's moves array for a winner combination
     function checkWin() {
         const winners = [
@@ -146,85 +120,116 @@ const gameController = (function() {
                 }
             }
             if (count == 3) {
-                endGame(currentPlayer);
+                currentPlayer.addPoint();
+                displayController.endRound(currentPlayer);
                 return;
             }
         }
         // If all squares(9) have been played, it's a tie game
         if (turns === 9) {
-        console.log("Tie game!");
+        displayController.endRound("tie");
         return;
         }
     };
 
-    return {playerOne, playerTwo, getCurrentPlayer, clearGame, playRound};
-    
+    return {
+        playerOne, playerTwo, getCurrentPlayer,
+        resetSettingsRound, resetSettingsGame, 
+        playMove};
 })();
 
 // Display the game, handle buttons
-function displayController() {
-    const squares = document.getElementsByClassName("square");
+const displayController = (() => {
+    const squareButtons = document.querySelectorAll(".square-button");
 
     const playerOneName = document.querySelector(".one .name");
     const playerOneMarker = document.querySelector(".one .marker");
+    const changeOneButton = document.querySelector(".one button");
     const playerOneScore = document.querySelector(".one .score");
 
     const playerTwoName = document.querySelector(".two .name");
     const playerTwoMarker = document.querySelector(".two .marker");
+    const changeTwoButton = document.querySelector(".two button");
     const playerTwoScore = document.querySelector(".two .score");
-
+          
     const startButton = document.querySelector(".start");
-    const changeButtons = document.querySelectorAll(".name-button");
+    const restartButton = document.querySelector(".restart");
+
+    function endRound(winner) {
+        const dialog = document.querySelector("dialog");
+        const winnerAnnouncement = document.querySelector("dialog p");
+        const startOverButton = document.querySelector(".close");
+        const continueButton = document.querySelector(".continue");
+
+        if (winner == "tie") {
+            winnerAnnouncement.textContent = "Tie game!"
+        }
+        else {
+            winnerAnnouncement.textContent = winner.getName() + " wins!";
+        }
+
+        dialog.showModal();
+        startOverButton.addEventListener("click", () => {
+            dialog.close();
+            gameController.resetSettingsGame();
+            resetDisplayGame();
+        })  
+        continueButton.addEventListener("click", () => {
+            dialog.close();
+            gameController.resetSettingsRound();
+            resetDisplayRound();
+            showScore();
+        })
+        
+    };
+
+    // Set display for a new round (after continue)
+    function resetDisplayRound() {
+        getMarkers();
+
+        // Clear grid
+        for (let i = 0; i < squareButtons.length; i++) {
+            squareButtons[i].textContent = "";
+            squareButtons[i].disabled = false;
+        };
+        playRound();
+    }
+
+    // Set display for a new game (after restart or start over)
+    function resetDisplayGame() {
+        startButton.textContent = "Start";
+        startButton.style.visibility = "visible";
+        restartButton.textContent = "Restart";
+        restartButton.style.visibility = "hidden";
+
+        playerOneName.textContent = "Player 1";
+        playerOneScore.textContent = "";
+        changeOneButton.textContent = "Change name";
+        changeOneButton.style.visibility = "visible";
+
+        playerTwoName.textContent = "Player 2";
+        playerTwoScore.textContent = "";
+        changeTwoButton.textContent = "Change name";
+        changeTwoButton.style.visibility = "visible";
+    }
 
     // Change name of the player (after button clicked)
-    function changeName(playerOld, playerName) {
-        let newName = prompt("New name for " + playerOld.getName());
+    function changeName(player, nameDisplay) {
+        let newName = prompt("New name for " + player.getName());
         if (newName) {
-            playerOld.setName(newName);
-            playerName.textContent = newName;
+            player.setName(newName);
+            nameDisplay.textContent = newName;
         }
         else {
             return;
         }
     }
 
-    // Start the game
-    function startGame() {
-        // Remove change name buttons
-        changeButtons.forEach((button) => {
-            button.remove();
-        });
-        getMarkers();
-        clearGameboard();
-
-        //Set scores to 0;
-        // playerOneScore.textContent = gameController.playerOne.getScore();
-        // playerTwoScore.textContent = gameController.playerTwo.getScore()
-
-        // Create the grid buttons
-        const squareButtons = document.querySelectorAll(".square-button");
+    function playRound() {
+        // Make buttons active again
         squareButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-                // Add marker of the current player in the square
-                button.textContent = gameController.getCurrentPlayer().marker;
-                // Disable button to avoid unauthorized move
-                button.disabled = true;
-                gameController.playRound(gameController.getCurrentPlayer(), button.dataset.id);
-                getMarkers();
-
-            })
-        });
-
-        // Add a restart button
-        const restartButton = document.createElement("button");
-        const header = document.querySelector(".header");
-        restartButton.textContent = "Restart";
-        header.appendChild(restartButton); 
-        restartButton.addEventListener("click", () => {
-            clearGameboard();
-            
+            button.style.visibility = "visible";
         })
-        
     }
 
     // Display marker of currentPlayer while hiding the other player's marker
@@ -241,54 +246,51 @@ function displayController() {
         }
     }
 
-    function clearGameboard() {
-        // Clear grid
-        let squareButtons = document.querySelectorAll(".square-button");
-        for (let i = 0; i < squareButtons.length; i++) {
-            squareButtons[i].textContent = "";
-            squareButtons[i].disabled = false;
-        }
-        // Clear player's moves
-        gameController.playerOne.clearMoves();
-        gameController.playerTwo.clearMoves();
-
-        // Clear moves (to check ties) and set currentPlayer to player 1
-        gameController.clearGame();
-        getMarkers();
+    function showScore () {
+        playerOneScore.textContent = "Score: " + gameController.playerOne.getScore();
+        playerTwoScore.textContent = "Score: " + gameController.playerTwo.getScore();
     }
 
-    function renderGameboard() {
-        // Render gameboard with actualised data
-        for (let i = 0; i < squares.length; i++) {
-            let button = document.createElement("button");
-            button.classList.add("square-button");
-            button.dataset.id = i;
-            squares[i].appendChild(button);
-        }
-        
-        // Change name of the player (js and DOM)
-        changeButtons.forEach((button) => {
+     // Add event listener to change the name of the player
+        changeOneButton.addEventListener("click", () => {
+            changeName(gameController.playerOne, playerOneName);
+            });
+        changeTwoButton.addEventListener("click", () => {
+            changeName(gameController.playerTwo, playerTwoName);
+            });
+
+    // Create event listener for grid buttons
+        squareButtons.forEach((button) => {
+            button.style.visibility = "hidden";
             button.addEventListener("click", () => {
-                if (button.id == "change-one") {
-                    changeName(gameController.playerOne, playerOneName);
-                }
-                else {
-                    changeName(gameController.playerTwo, playerTwoName);
-                }
-            })
-        })
-
+                // Add marker of the current player in the square
+                button.textContent = gameController.getCurrentPlayer().marker;
+                // Disable button to avoid unauthorized move
+                button.disabled = true;
+                gameController.playMove(button.dataset.id);
+                getMarkers();
+            });
+        });
+    // Add event listener to start button: Remove change name buttons, add
+        // marker and start game.
         startButton.addEventListener("click", () => {
-            startButton.remove();
-            startGame();
+            startButton.style.visibility = "hidden";
+            changeOneButton.style.visibility = "hidden";
+            changeTwoButton.style.visibility = "hidden";
+            restartButton.style.visibility = "visible";
+            resetDisplayRound();
+            playRound();
         })
-    }
-    
+        
+    // Add event listener to restart button
+        restartButton.addEventListener("click", () => {
+            restartButton.style.visibility = "hidden";
+            startButton.style.visibility = "visible";
+            resetDisplayGame();
+            gameController.resetSettingsGame();
+        });
 
-   
+    resetDisplayGame();
+    return {endRound};
+})();
 
-
-    
-    renderGameboard();
-}
-displayController();

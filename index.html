@@ -8,44 +8,37 @@
 </head>
 <body>
     <div class="header">
-        <button class="start">Start</button>
+        <button class="start"></button>
     </div>
     <div class="main">
         <div class="player one">
-            <div class="marker">O</div>
-            <div class="name">
-                Player 1
-            </div>
-            <div class="change-name">
-                <button class="name-button" id="change-one">Change name</button>
-            </div>
+            <div class="marker"></div>
+            <div class="name"></div>
+            <button class="one"></button>
             <div class="score"></div>
         </div>
         <div class="board-container">
-            <div class="top-row left square"></div>
-            <div class="top-row middle square"></div>
-            <div class="top-row right square"></div>
-            <div class="middle-row left square"></div>
-            <div class="middle-row middle square"></div>
-            <div class="middle-row right square"></div>
-            <div class="bottom-row left square"></div>
-            <div class="bottom-row middle square"></div>
-            <div class="bottom-row right square"></div>
+            <div class="top-row left square"><button class="square-button" data-id="0"></button></div>
+            <div class="top-row middle square"><button class="square-button" data-id="1"></button></div>
+            <div class="top-row right square"><button class="square-button" data-id="2"></button></div>
+            <div class="middle-row left square"><button class="square-button" data-id="3"></button></div>
+            <div class="middle-row middle square"><button class="square-button" data-id="4"></button></div>
+            <div class="middle-row right square"><button class="square-button" data-id="5"></button></div>
+            <div class="bottom-row left square"><button class="square-button" data-id="6"></button></div>
+            <div class="bottom-row middle square"><button class="square-button" data-id="7"></button></div>
+            <div class="bottom-row right square"><button class="square-button" data-id="8"></button></div>
         </div>
         <div class="player two">
-            <div class="marker">X</div>
-            <div class="name">
-                Player 2
-            </div>
-            <div class="change-name">
-                <button class="name-button" id="change-two">Change name</button>
-            </div>
+            <div class="marker"></div>
+            <div class="name"></div>
+            <button class="two"></button>
             <div class="score"></div>
         </div>
     </div>
+    <button class="restart"></button>
     <dialog>
         <p></p>
-        <button classe="close" autofocus>Start over</button>
+        <button class="close" autofocus>Start over</button>
         <button class="continue">Continue</button>
     </dialog>
 
